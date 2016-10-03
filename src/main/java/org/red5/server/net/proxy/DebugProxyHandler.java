@@ -117,11 +117,13 @@ public class DebugProxyHandler extends IoHandlerAdapter implements ResourceLoade
         rawFile.createNewFile();
         FileOutputStream headersFos = null;
         FileOutputStream rawFos = null;
+        WritableByteChannel headers = null;
+        WritableByteChannel raw = null;
         try {
             headersFos = new FileOutputStream(headersFile);
             rawFos = new FileOutputStream(rawFile);
-            WritableByteChannel headers = headersFos.getChannel();
-            WritableByteChannel raw = rawFos.getChannel();
+            headers = headersFos.getChannel();
+            raw = rawFos.getChannel();
             IoBuffer header = IoBuffer.allocate(1);
             header.put((byte) (isClient ? 0x00 : 0x01));
             header.flip();
@@ -133,6 +135,12 @@ public class DebugProxyHandler extends IoHandlerAdapter implements ResourceLoade
             }
             if (rawFos != null) {
                 rawFos.close();
+            }
+            if (headers != null) {
+                headers.close();
+            }
+            if (raw != null) {
+                raw.close();
             }
         }
         //session.getFilterChain().addLast("logger", new LoggingFilter() );
