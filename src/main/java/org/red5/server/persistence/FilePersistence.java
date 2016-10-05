@@ -536,6 +536,7 @@ public class FilePersistence extends RamPersistence {
 			//Resource resFile = resources.getResource(filename);
 			//log.debug("Resource (file) check #1 - file name: {} exists: {}", resPath.getFilename(), exists);
 			IoBuffer buf = null;
+			FileOutputStream output = null;
 			try {
 				int initialSize = 8192;
 				if (file.exists()) {
@@ -549,7 +550,7 @@ public class FilePersistence extends RamPersistence {
 				object.serialize(out);
 				buf.flip();
 
-				FileOutputStream output = new FileOutputStream(file.getAbsolutePath());
+				output = new FileOutputStream(file.getAbsolutePath());
 				ServletUtils.copy(buf.asInputStream(), output);
 				output.close();
 				log.debug("Stored persistent object {} at {}", object, filename);
@@ -564,6 +565,15 @@ public class FilePersistence extends RamPersistence {
 				}
 				file = null;
 				dir = null;
+				if (output != null) {
+					try {
+						output.close();
+						output = null;
+					} catch (IOException ex) {
+						log.warn("Failed to close output stream.");
+					}
+				}
+
 			}
 		}
 		return result;
